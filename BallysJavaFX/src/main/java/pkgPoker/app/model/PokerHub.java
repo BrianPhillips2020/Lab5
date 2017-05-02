@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import netgame.common.Hub;
 import pkgPokerBLL.Action;
@@ -67,25 +68,39 @@ public class PokerHub extends Hub {
 				sendToAll(HubPokerTable);
 				break;
 			case StartGame:
-				// Get the rule from the Action object.
+				
+				
 				Rule rle = new Rule(act.geteGame());
-				//TODO Lab #5 - If neither player has 'the button', pick a random player
-				//		and assign the button.
 				
-				if(actPlayer.getPlayerID() == null){
-					actPlayer.setiPlayerPosition(1);
-				}
+				
 				Player DealerID= actPlayer;
-				
-				
-				
-				
-				
-				HubGamePlay= new GamePlay(rle, DealerID.getPlayerID());
 				
 				HubGamePlay.setGamePlayers(HubPokerTable.getHmPlayer());
 				
+				if(actPlayer.getPlayerName() == null){
+					ArrayList<Player> pList = new ArrayList<Player>();
+					
+					Random rand = new Random();
+					HubGamePlay = new GamePlay(rle, pList.get(rand.nextInt(pList.size())+1).getPlayerID());
+				}
+				else{
+					HubGamePlay = new GamePlay(rle, actPlayer.getPlayerID());
+				}
 				
+				HubGamePlay.setGamePlayers(HubPokerTable.getHmPlayer());
+				
+				int jokers = rle.GetNumberOfJokers();
+				ArrayList<Card> wilds = rle.GetWildCards();
+				
+				int[] playerOrder = GamePlay.GetOrder(actPlayer.getiPlayerPosition());
+				HubGamePlay.setiActOrder(playerOrder);
+				
+		
+				// Get the rule from the Action object.
+				
+				//TODO Lab #5 - If neither player has 'the button', pick a random player
+				//		and assign the button.
+	
 			
 				//TODO Lab #5 - Start the new instance of GamePlay
 								
@@ -97,6 +112,30 @@ public class PokerHub extends Hub {
 
 			case Draw:
 
+				
+				Rule rl = new Rule(act.geteGame());
+				int minCommCards = rl.getCommunityCardsMin();
+				int playermin = rl.getPlayerCardsMin();
+				int playerMax = rl.getPlayerCardsMax();
+				
+				ArrayList<Player> pList = new ArrayList<Player>();
+				pList.addAll(HubGamePlay.getGamePlayers().values());
+				
+				for(Player p : pList){
+					
+					int currentHandCount = HubGamePlay.getPlayerHand(p).getCardsInHand().size();
+					
+					for(int i = currentHandCount; i <= playerMax; i++){
+						HubGamePlay.drawCard(p,  eCardDestination.Player);
+					}
+				}
+				
+				int currentCommCount = HubGamePlay.getGameCommonHand().getCardsInHand().size();
+				for(int i = currentCommCount; i <= minCommCards; i++){
+					HubGamePlay.drawCard(null, eCardDestination.Community);
+				}
+				
+				HubGamePlay.seteDrawCountLast(eDrawCount.NONE);
 				// for each player in table. Iterate draw for the draw count getTotalCardsToDraw
 				//GetDrawCard
 				//TODO Lab #5 -	Draw card(s) for each player in the game.
@@ -106,12 +145,7 @@ public class PokerHub extends Hub {
 					Set edraw count +1 
 				}
 				*/
-				int i;
-			
-				for(i = 0; i <= HubGamePlay.getGamePlayers().size(); i++){
-					HubGamePlay.getPlayerHand(HubGamePlay.getPlayerByPosition(i)).AddCardToHand(HubGamePlay.getGameDeck().Draw());
-				}
-				HubGamePlay.getPlayerHand(HubGamePlay.getPlayerByPosition(i)).AddCardToHand(HubGamePlay.getGameDeck().Draw());
+				
 				//TODO Lab #5 -	Make sure to set the correct visiblity
 				//TODO Lab #5 -	Make sure to account for community cards
 

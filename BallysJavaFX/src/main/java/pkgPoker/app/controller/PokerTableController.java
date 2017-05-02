@@ -25,8 +25,10 @@ import pkgPoker.app.MainApp;
 import pkgPokerEnum.eAction;
 import pkgPokerEnum.eGame;
 import pkgPokerBLL.Action;
+import pkgPokerBLL.Card;
 import pkgPokerBLL.GamePlay;
 import pkgPokerBLL.Player;
+import pkgPokerBLL.Rule;
 import pkgPokerBLL.Table;
 
 public class PokerTableController implements Initializable {
@@ -219,7 +221,29 @@ public class PokerTableController implements Initializable {
 	}
 
 	public void Handle_GameState(GamePlay HubPokerGame) {
-
+		
+		
+		Rule r = HubPokerGame.getRule();
+		
+		ArrayList<Card> cards = HubPokerGame.getPlayerHand(mainApp.getPlayer()).getCardsInHand();
+		int x;
+		int y;
+		
+		if(mainApp.getPlayer().getiPlayerPosition()==1){
+			x = (int) hboxP1Cards.getLayoutX();
+			y = (int) hboxP1Cards.getLayoutY();
+		}else{
+			x = (int) hboxP2Cards.getLayoutX();
+			y = (int) hboxP2Cards.getLayoutY();
+		}
+		
+		for (Card c : cards){
+			Label l = new Label();
+			l.setText(c.geteRank() + " of " + c.geteSuit());
+			l.relocate(x,y);
+			x = x + 50;
+		}
+		
 	}
 
 	private ImageView BuildImage(int iCardNbr) {
